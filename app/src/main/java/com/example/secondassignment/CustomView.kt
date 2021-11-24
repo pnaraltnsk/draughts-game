@@ -24,6 +24,8 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     private var _touch_y: HashMap<Int, Float> = HashMap<Int, Float>()
 
 
+    var draughtsInterface : DraughtsInterface? = null
+
     init{
         _red = Paint(Paint.ANTI_ALIAS_FLAG)
         _blue = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -55,20 +57,21 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     }
 
     private fun drawPieces(canvas: Canvas) {
-        for (row in 0 until 3){
-            for (col in 0 until 8){
-                if (row % 2 == 0 && col % 2 == 0)
-                    canvas.drawCircle(originX + (col * side) + (side/2), originY + (row * side) + (side/2), side/2, _blue)
-                if ((7-row) % 2 == 1 && col % 2 == 1)
-                    canvas.drawCircle(originX + (col * side) + (side/2), originY + ((7-row) * side) + (side/2), side/2, _red)
+        for (row in 0 until 8){
+            for (col in 0 until 8 ){
+                //if (row % 2 == 0 && col % 2 == 0){
+                val stn = draughtsInterface?.stonePos(col,row)
+                if(stn != null){
+                    if (stn.player == DraughtPlayer.BLUE)
+                        canvas.drawCircle(originX + (col * side) + (side/2), originY + (row * side) + (side/2), side/2, _blue)
+                    if (stn.player == DraughtPlayer.RED)
+                        canvas.drawCircle(originX + (col * side) + (side/2), originY + ((row) * side) + (side/2), side/2, _red)
+                }
 
-
-                if (row % 2 == 1 && col % 2 == 1)
-                    canvas.drawCircle(originX + (col * side) + (side/2), originY + (row * side) + (side/2), side/2, _blue)
-                if ((7-row) % 2 == 0 && col % 2 == 0)
-                    canvas.drawCircle(originX + (col * side) + (side/2), originY + ((7-row) * side) + (side/2), side/2, _red)
-
-
+                //if (row % 2 == 1 && col % 2 == 1){
+                //    canvas.drawCircle(originX + (col * side) + (side/2), originY + (row * side) + (side/2), side/2, _blue)
+                //    canvas.drawCircle(originX + (col * side) + (side/2), originY + ((7-row) * side) + (side/2), side/2, _red)
+                //}
             }
         }
     }
