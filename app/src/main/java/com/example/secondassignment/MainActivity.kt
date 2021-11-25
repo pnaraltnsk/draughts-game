@@ -23,4 +23,6 @@ class MainActivity : AppCompatActivity(), DraughtsInterface {
         val draughtsV = findViewById<CustomView>(R.id.customview)
         draughtsV.invalidate()
     }
+
+
 }

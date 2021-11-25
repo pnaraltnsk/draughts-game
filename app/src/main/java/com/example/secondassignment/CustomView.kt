@@ -60,7 +60,6 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     private fun drawPieces(canvas: Canvas) {
         for (row in 0 until 8){
             for (col in 0 until 8 ){
-                //if (row % 2 == 0 && col % 2 == 0){
                 val stn = draughtsInterface?.stonePos(col,row)
                 if(stn != null){
                     if (stn.player == DraughtPlayer.BLUE)
@@ -69,10 +68,7 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
                         canvas.drawCircle(xx + (col * side) + (side/2), yy + ((row) * side) + (side/2), side/2, _red)
                 }
 
-                //if (row % 2 == 1 && col % 2 == 1){
-                //    canvas.drawCircle(originX + (col * side) + (side/2), originY + (row * side) + (side/2), side/2, _blue)
-                //    canvas.drawCircle(originX + (col * side) + (side/2), originY + ((7-row) * side) + (side/2), side/2, _red)
-                //}
+
             }
         }
     }
@@ -84,13 +80,18 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
             MotionEvent.ACTION_DOWN -> {
                 f_col = ((event.x - xx) / side).toInt()
                 f_row =  ((event.y - yy) / side).toInt()
-                Log.i("CHECK","("+f_col+","+f_row+")")
+                //Log.i("CHECK","("+f_col+","+f_row+")")
+
+
             }
             MotionEvent.ACTION_UP -> {
                 val col = ((event.x - xx) / side).toInt()
                 val row = ((event.y - yy) / side).toInt()
+                val p = draughtsInterface?.stonePos(f_col,f_row)
+
                 draughtsInterface?.move(f_col,f_row,col,row)
-                Log.i("TAGG","from"+f_col+","+f_row+"to"+col+","+row)
+                //Log.i("TAGG","from"+f_col+","+f_row+"to"+col+","+row)
+
             }
             MotionEvent.ACTION_MOVE -> {
 
@@ -98,6 +99,8 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
         }
         return true
     }
+
+
 
 
 }
