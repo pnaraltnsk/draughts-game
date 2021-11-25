@@ -5,14 +5,16 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import java.lang.Double.min
 import kotlin.math.min
 
 class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val scaleFactor = 1.0f
-    private final var originX = 20f
-    private final var originY = 200f
+    private final var xx = 20f
+    private final var yy = 200f
     private final var side = 130f
     private val lightGray = Color.LTGRAY
     private val darkGray = Color.DKGRAY
@@ -20,9 +22,8 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     private lateinit var _red : Paint
     private lateinit var _blue : Paint
     private var _pointers: Int = 0
-    private var _touch_x: HashMap<Int, Float> = HashMap<Int, Float>()
-    private var _touch_y: HashMap<Int, Float> = HashMap<Int, Float>()
-
+    private var f_col: Int = -1
+    private var f_row: Int = -1
 
     var draughtsInterface : DraughtsInterface? = null
 
@@ -38,8 +39,8 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
 
         val boardSide = min(width, height) * scaleFactor
         side = boardSide / 8f
-        originX = (width - boardSide) / 2f
-        originY = (height - boardSide) / 2f
+        xx = (width - boardSide) / 2f
+        yy = (height - boardSide) / 2f
 
         drawBoard(canvas)
         drawPieces(canvas)
@@ -53,7 +54,7 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
 
     private fun drawSquare(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
         paint.color = if (isDark) darkGray else lightGray
-        canvas.drawRect(originX + col * side, originY + row * side, originX + (col + 1)* side, originY + (row + 1) * side, paint)
+        canvas.drawRect(xx + col * side, yy + row * side, xx + (col + 1)* side, yy + (row + 1) * side, paint)
     }
 
     private fun drawPieces(canvas: Canvas) {
@@ -63,9 +64,9 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
                 val stn = draughtsInterface?.stonePos(col,row)
                 if(stn != null){
                     if (stn.player == DraughtPlayer.BLUE)
-                        canvas.drawCircle(originX + (col * side) + (side/2), originY + (row * side) + (side/2), side/2, _blue)
+                        canvas.drawCircle(xx + (col * side) + (side/2), yy + (row * side) + (side/2), side/2, _blue)
                     if (stn.player == DraughtPlayer.RED)
-                        canvas.drawCircle(originX + (col * side) + (side/2), originY + ((row) * side) + (side/2), side/2, _red)
+                        canvas.drawCircle(xx + (col * side) + (side/2), yy + ((row) * side) + (side/2), side/2, _red)
                 }
 
                 //if (row % 2 == 1 && col % 2 == 1){
@@ -76,13 +77,27 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
         }
     }
 
-    private fun drawSingleTouch(canvas: Canvas?) {
-        for(key in _touch_x.keys) {
-            canvas?.save()
-            canvas?.translate(_touch_x[key]!!, _touch_y[key]!!)
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event ?: return false
 
-            canvas?.restore()
+        when ( event.action){
+            MotionEvent.ACTION_DOWN -> {
+                f_col = ((event.x - xx) / side).toInt()
+                f_row =  ((event.y - yy) / side).toInt()
+                Log.i("CHECK","("+f_col+","+f_row+")")
+            }
+            MotionEvent.ACTION_UP -> {
+                val col = ((event.x - xx) / side).toInt()
+                val row = ((event.y - yy) / side).toInt()
+                draughtsInterface?.move(f_col,f_row,col,row)
+                Log.i("TAGG","from"+f_col+","+f_row+"to"+col+","+row)
+            }
+            MotionEvent.ACTION_MOVE -> {
+
+            }
         }
+        return true
     }
+
 
 }

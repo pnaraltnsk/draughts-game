@@ -17,4 +17,10 @@ class MainActivity : AppCompatActivity(), DraughtsInterface {
     override fun stonePos(col: Int, row: Int): DraughtPieces? {
         return draughts.stonePos(col,row)
     }
+
+    override fun move(fromC: Int, fromR: Int, toC: Int, toR: Int) {
+        draughts.move(fromC,fromR,toC,toR)
+        val draughtsV = findViewById<CustomView>(R.id.customview)
+        draughtsV.invalidate()
+    }
 }
