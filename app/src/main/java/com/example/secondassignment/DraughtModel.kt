@@ -18,12 +18,12 @@ class DraughtModel {
         for (row in 0 until 3){
             for (col in 0 until 8){
                 if (row % 2 == 0 && col % 2 == 0){
-                    stones.add(DraughtPieces(col , row, DraughtPlayer.BLUE))
-                    stones.add(DraughtPieces(col+1 , 7-row, DraughtPlayer.RED))
+                    stones.add(DraughtPieces(col , row, DraughtPlayer.BLUE, PlayerRank.MAN))
+                    stones.add(DraughtPieces(col+1 , 7-row, DraughtPlayer.RED, PlayerRank.MAN))
                 }
                 if (row % 2 == 1 && col % 2 == 1){
-                    stones.add(DraughtPieces(col , row, DraughtPlayer.BLUE))
-                    stones.add(DraughtPieces(col-1 , 7-row, DraughtPlayer.RED))
+                    stones.add(DraughtPieces(col , row, DraughtPlayer.BLUE, PlayerRank.MAN))
+                    stones.add(DraughtPieces(col-1 , 7-row, DraughtPlayer.RED, PlayerRank.MAN))
                 }
 
             }
@@ -42,18 +42,26 @@ class DraughtModel {
         var fromStone = stonePos(fromC,fromR) ?: null
 
         if(!cap){
-            if ((fromStone?.player == DraughtPlayer.BLUE) && player)
+            if ((fromStone?.player == DraughtPlayer.BLUE) && player && fromStone?.rank == PlayerRank.MAN)
                 playerBlue(fromC,fromR,toC,toR,fromStone)
+            else if ((fromStone?.player == DraughtPlayer.BLUE) && player && fromStone?.rank == PlayerRank.KING)
+                king(fromC,fromR,toC,toR,fromStone)
 
-            if ((fromStone?.player == DraughtPlayer.RED) && !player)
+            else if ((fromStone?.player == DraughtPlayer.RED) && !player && fromStone?.rank == PlayerRank.MAN)
                 playerRed(fromC,fromR,toC,toR,fromStone)
+            else if ((fromStone?.player == DraughtPlayer.RED) && !player && fromStone?.rank == PlayerRank.KING)
+                king(fromC,fromR,toC,toR,fromStone)
         }
         else{
-            if ((fromStone?.player == DraughtPlayer.BLUE) && player)
+            if ((fromStone?.player == DraughtPlayer.BLUE) && player && fromStone?.rank == PlayerRank.MAN)
                 chainBlue(fromC,fromR,toC,toR,fromStone)
 
-            if ((fromStone?.player == DraughtPlayer.RED) && !player)
+            else if ((fromStone?.player == DraughtPlayer.RED) && !player && fromStone?.rank == PlayerRank.MAN)
                 chainRed(fromC,fromR,toC,toR,fromStone)
+            else if ((fromStone?.player == DraughtPlayer.BLUE) && player && fromStone?.rank == PlayerRank.KING)
+                chainKing(fromC,fromR,toC,toR,fromStone)
+            else if ((fromStone?.player == DraughtPlayer.RED) && !player && fromStone?.rank == PlayerRank.KING)
+                chainKing(fromC,fromR,toC,toR,fromStone)
         }
 
 
@@ -61,9 +69,12 @@ class DraughtModel {
 
     fun playerBlue(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
         if(stonePos(toC,toR) == null){
-            if (toR == fromR+1){
+            if (toR == fromR+1 && !cap){
                 if(toC == fromC-1 || toC == fromC+1){
-                    stones.add(DraughtPieces(toC,toR,fromStone.player))
+                    if(toR != 7 && fromStone.rank !=PlayerRank.KING)
+                        stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                    else
+                        stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                     stones.remove(fromStone)
                     player = false}
             }
@@ -73,13 +84,17 @@ class DraughtModel {
                         stonePos(fromC-1,fromR+1)?.let {
                             if (it.player == fromStone?.player)
                                 return
-                            stones.add(DraughtPieces(toC,toR,fromStone.player))
+                            if(toR != 7 && fromStone.rank !=PlayerRank.KING)
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                            else
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
                             if ((toC+2< 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
                                 cap = true
                                 c_col = toC
                                 c_row = toR
+                                player = true
                             }
                             else
                                 player = false
@@ -97,7 +112,10 @@ class DraughtModel {
                         stonePos(fromC+1,fromR+1)?.let {
                             if (it.player == fromStone?.player)
                                 return
-                            stones.add(DraughtPieces(toC,toR,fromStone.player))
+                            if(toR != 7 && fromStone.rank !=PlayerRank.KING)
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                            else
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
                             if ((toC+2< 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
@@ -112,11 +130,42 @@ class DraughtModel {
             }
         }
     }
+
+    fun king(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
+        if(stonePos(toC,toR) == null) {
+            if (toR > fromR) {
+                playerBlue(fromC,fromR,toC,toR,fromStone)
+                if (fromStone.player == DraughtPlayer.RED)
+                    player = true
+            }
+            else if(toR < fromR ) {
+                playerRed(fromC,fromR,toC,toR,fromStone)
+                if(fromStone.player == DraughtPlayer.BLUE)
+                    player = false
+            }
+        }
+    }
+
+    fun chainKing(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
+        if(stonePos(toC,toR) == null) {
+            if (toR > fromR ) {
+                playerBlue(fromC,fromR,toC,toR,fromStone)
+
+            }
+            else if(toR < fromR) {
+                playerRed(fromC,fromR,toC,toR,fromStone)
+            }
+        }
+    }
+
     fun playerRed(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
         if(stonePos(toC,toR) == null){
             if (toR == fromR-1){
                 if(toC == fromC-1 || toC == fromC+1){
-                    stones.add(DraughtPieces(toC,toR,fromStone.player))
+                    if(toR != 0 && fromStone.rank !=PlayerRank.KING)
+                        stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                    else
+                        stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                     stones.remove(fromStone)
                     player = true}
             }
@@ -126,7 +175,10 @@ class DraughtModel {
                         stonePos(fromC-1,fromR-1)?.let {
                             if (it.player == fromStone?.player)
                                 return
-                            stones.add(DraughtPieces(toC,toR,fromStone.player))
+                            if(toR != 0 && fromStone.rank !=PlayerRank.KING)
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                            else
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
                             if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
@@ -146,7 +198,10 @@ class DraughtModel {
                         stonePos(fromC+1,fromR-1)?.let {
                             if (it.player == fromStone?.player)
                                 return
-                            stones.add(DraughtPieces(toC,toR,fromStone.player))
+                            if(toR != 0 && fromStone.rank !=PlayerRank.KING)
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                            else
+                                stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
                             if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
@@ -160,7 +215,6 @@ class DraughtModel {
                     }
                 }
             }
-
         }
     }
 
@@ -172,7 +226,10 @@ class DraughtModel {
                     stonePos(fromC-1,fromR+1)?.let {
                         if (it.player == fromStone?.player)
                             return
-                        stones.add(DraughtPieces(toC,toR,fromStone.player))
+                        if(toR != 7 && fromStone.rank !=PlayerRank.KING)
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                        else
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
                         if ((toC+2 < 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
@@ -191,7 +248,10 @@ class DraughtModel {
                     stonePos(fromC+1,fromR+1)?.let {
                         if (it.player == fromStone?.player)
                             return
-                        stones.add(DraughtPieces(toC,toR,fromStone.player))
+                        if(toR != 7 && fromStone.rank !=PlayerRank.KING)
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                        else
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
                         if ((toC+2< 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
@@ -215,7 +275,10 @@ class DraughtModel {
                     stonePos(fromC-1,fromR-1)?.let {
                         if (it.player == fromStone?.player)
                             return
-                        stones.add(DraughtPieces(toC,toR,fromStone.player))
+                        if(toR != 0 && fromStone.rank !=PlayerRank.KING)
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                        else
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
                         if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
@@ -236,7 +299,10 @@ class DraughtModel {
                     stonePos(fromC+1,fromR-1)?.let {
                         if (it.player == fromStone?.player)
                             return
-                        stones.add(DraughtPieces(toC,toR,fromStone.player))
+                        if(toR != 0 && fromStone.rank !=PlayerRank.KING)
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
+                        else
+                            stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
                         if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){

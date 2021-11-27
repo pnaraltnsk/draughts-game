@@ -1,15 +1,17 @@
 package com.example.secondassignment
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import java.lang.Double.min
 import kotlin.math.min
+import android.graphics.Path.FillType
+
+
+
 
 class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val scaleFactor = 1.0f
@@ -62,15 +64,39 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
             for (col in 0 until 8 ){
                 val stn = draughtsInterface?.stonePos(col,row)
                 if(stn != null){
-                    if (stn.player == DraughtPlayer.BLUE)
+                    if (stn.player == DraughtPlayer.BLUE && stn.rank == PlayerRank.MAN)
                         canvas.drawCircle(xx + (col * side) + (side/2), yy + (row * side) + (side/2), side/2, _blue)
-                    if (stn.player == DraughtPlayer.RED)
+                    else if(stn.player == DraughtPlayer.BLUE && stn.rank == PlayerRank.KING)
+                        drawKing(canvas, stn.player, col, row )
+                    if (stn.player == DraughtPlayer.RED && stn.rank == PlayerRank.MAN)
                         canvas.drawCircle(xx + (col * side) + (side/2), yy + ((row) * side) + (side/2), side/2, _red)
+                    else if(stn.player == DraughtPlayer.RED && stn.rank == PlayerRank.KING)
+                        drawKing(canvas, stn.player, col, row )
                 }
 
 
             }
         }
+    }
+
+    fun drawKing(canvas: Canvas, player: DraughtPlayer, col: Int, row: Int) {
+
+
+        val a = Point((xx+ (col * side)+ side/2).toInt(), (yy+ (row * side) ).toInt())
+        val b = Point((xx+ (col * side)).toInt(), (yy+ (row * side)+side).toInt())
+        val c = Point((xx+ (col * side)+side).toInt(), (yy+ (row * side) + side).toInt())
+
+
+        val path = Path()
+        path.moveTo(b.x.toFloat(), b.y.toFloat())
+        path.lineTo(c.x.toFloat(), c.y.toFloat())
+        path.lineTo(a.x.toFloat(), a.y.toFloat())
+        path.close()
+
+        if(player == DraughtPlayer.BLUE)
+            canvas.drawPath(path, _blue)
+        else
+            canvas.drawPath(path, _red)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
