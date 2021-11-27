@@ -58,10 +58,9 @@ class DraughtModel {
 
             else if ((fromStone?.player == DraughtPlayer.RED) && !player && fromStone?.rank == PlayerRank.MAN)
                 chainRed(fromC,fromR,toC,toR,fromStone)
-            else if ((fromStone?.player == DraughtPlayer.BLUE) && player && fromStone?.rank == PlayerRank.KING)
+            else if (fromStone?.rank == PlayerRank.KING)
                 chainKing(fromC,fromR,toC,toR,fromStone)
-            else if ((fromStone?.player == DraughtPlayer.RED) && !player && fromStone?.rank == PlayerRank.KING)
-                chainKing(fromC,fromR,toC,toR,fromStone)
+
         }
 
 
@@ -69,7 +68,7 @@ class DraughtModel {
 
     fun playerBlue(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
         if(stonePos(toC,toR) == null){
-            if (toR == fromR+1 && !cap){
+            if (toR == fromR+1){
                 if(toC == fromC-1 || toC == fromC+1){
                     if(toR != 7 && fromStone.rank !=PlayerRank.KING)
                         stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.MAN))
@@ -94,7 +93,6 @@ class DraughtModel {
                                 cap = true
                                 c_col = toC
                                 c_row = toR
-                                player = true
                             }
                             else
                                 player = false
@@ -147,13 +145,37 @@ class DraughtModel {
     }
 
     fun chainKing(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
-        if(stonePos(toC,toR) == null) {
+        if(stonePos(toC,toR) == null && fromC == c_col && fromR == c_row) {
             if (toR > fromR ) {
-                playerBlue(fromC,fromR,toC,toR,fromStone)
+                chainBlue(fromC,fromR,toC,toR,fromStone)
+                if (!cap && ((stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone?.player ) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone?.player))) {
+                    if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-2,toR-2)== null || stonePos(toC+2,toR-2)== null)){
+                        cap = true
+                        c_col = toC
+                        c_row = toR
+                        if(fromStone.player != DraughtPlayer.RED)
+                            player = !player
+                    }
+                }
+
+                else if(fromStone.player == DraughtPlayer.RED)
+                    player = true
 
             }
             else if(toR < fromR) {
-                playerRed(fromC,fromR,toC,toR,fromStone)
+                chainRed(fromC,fromR,toC,toR,fromStone)
+                if (!cap && ((stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone?.player ) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone?.player))){
+                    if ((toC+2 < 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-2,toR+2)== null ||  stonePos(toC+2,toR+2)== null)){
+                        cap = true
+                        c_col = toC
+                        c_row = toR
+                        if(fromStone.player != DraughtPlayer.BLUE)
+                            player = !player
+                    }
+                }
+
+                else if(fromStone.player == DraughtPlayer.BLUE)
+                    player = false
             }
         }
     }
@@ -220,9 +242,9 @@ class DraughtModel {
 
 
     fun chainBlue(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
-        if(fromC == c_col && fromR == c_row && toR == fromR+2){
-            if(toC == fromC-2){
-                if(stonePos(fromC-1,fromR+1)!= null ){
+        if(fromC == c_col && fromR == c_row && toR == fromR+2 && fromR+2<8){
+            if(toC == fromC-2 && fromC-2>=0){
+                if(stonePos(fromC-1,fromR+1)!= null && stonePos(toC,toR)== null ){
                     stonePos(fromC-1,fromR+1)?.let {
                         if (it.player == fromStone?.player)
                             return
@@ -242,9 +264,13 @@ class DraughtModel {
                             cap = false}
                         Log.i("CHECKK2","("+ it.col+","+it.row+")")}
                 }
+                else{
+                    player = false
+                    cap = false}
+
             }
-            else if(toC == fromC+2){
-                if(stonePos(fromC+1,fromR+1)!= null){
+            else if(toC == fromC+2 && fromC+2<8){
+                if(stonePos(fromC+1,fromR+1)!= null && stonePos(toC,toR)== null){
                     stonePos(fromC+1,fromR+1)?.let {
                         if (it.player == fromStone?.player)
                             return
@@ -263,15 +289,18 @@ class DraughtModel {
                             player = false
                             cap = false}}
                 }
+                else{
+                    player = false
+                    cap = false}
             }
         }
     }
 
 
     fun chainRed(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
-        if(fromC == c_col && fromR == c_row && toR == fromR-2){
-            if(toC == fromC-2){
-                if(stonePos(fromC-1,fromR-1)!= null ){
+        if(fromC == c_col && fromR == c_row && toR == fromR-2 && fromR-2>=0){
+            if(toC == fromC-2 && fromC-2>=0){
+                if(stonePos(fromC-1,fromR-1)!= null && stonePos(toC,toR)== null ){
                     stonePos(fromC-1,fromR-1)?.let {
                         if (it.player == fromStone?.player)
                             return
@@ -292,9 +321,12 @@ class DraughtModel {
                         Log.i("CHECKK2","("+ it.col+","+it.row+")")}
 
                 }
+                else{
+                    player = true
+                    cap = false}
             }
-            else if(toC == fromC+2){
-                if(stonePos(fromC+1,fromR-1)!= null){
+            else if(toC == fromC+2 && fromC+2<8){
+                if(stonePos(fromC+1,fromR-1)!= null && stonePos(toC,toR)== null){
 
                     stonePos(fromC+1,fromR-1)?.let {
                         if (it.player == fromStone?.player)
@@ -314,6 +346,9 @@ class DraughtModel {
                             player = false
                             cap = false}}
                 }
+                else{
+                    player = true
+                    cap = false}
             }
         }
     }
