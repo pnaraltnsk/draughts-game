@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.secondassignment.CustomView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/customview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:gravity="center"
+    android:orientation="vertical">
+    <com.example.secondassignment.CustomView
+        android:id="@+id/customview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
 
-
-</com.example.secondassignment.CustomView>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RESET"
+        android:id="@+id/resetbtn"/>
+</LinearLayout>

@@ -13,7 +13,7 @@ class DraughtModel {
 
     }
 
-    private fun default(){
+    fun default(){
         stones.removeAll(stones)
         for (row in 0 until 3){
             for (col in 0 until 8){
@@ -53,6 +53,7 @@ class DraughtModel {
                 king(fromC,fromR,toC,toR,fromStone)
         }
         else{
+            Log.i("chanchan","chaining")
             if ((fromStone?.player == DraughtPlayer.BLUE) && player && fromStone?.rank == PlayerRank.MAN)
                 chainBlue(fromC,fromR,toC,toR,fromStone)
 
@@ -89,7 +90,8 @@ class DraughtModel {
                                 stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
-                            if ((toC+2< 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
+                            if (toR+2 < 8 && ((toC-2 >= 0 && stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone.player && stonePos(toC-2,toR+2)== null)
+                                        || (toC+2< 8 && stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone.player && stonePos(toC+2,toR+2)== null))){
                                 cap = true
                                 c_col = toC
                                 c_row = toR
@@ -116,7 +118,8 @@ class DraughtModel {
                                 stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
-                            if ((toC+2< 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
+                            if (toR+2 < 8 && ((toC-2 >= 0 && stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone.player && stonePos(toC-2,toR+2)== null)
+                                        || (toC+2< 8 && stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone.player && stonePos(toC+2,toR+2)== null))){
                                 cap = true
                                 c_col = toC
                                 c_row = toR
@@ -147,35 +150,50 @@ class DraughtModel {
     fun chainKing(fromC: Int, fromR: Int,toC: Int, toR: Int, fromStone: DraughtPieces){
         if(stonePos(toC,toR) == null && fromC == c_col && fromR == c_row) {
             if (toR > fromR ) {
-                chainBlue(fromC,fromR,toC,toR,fromStone)
-                if (!cap && ((stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone?.player ) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone?.player))) {
-                    if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-2,toR-2)== null || stonePos(toC+2,toR-2)== null)){
-                        cap = true
-                        c_col = toC
-                        c_row = toR
-                        if(fromStone.player != DraughtPlayer.RED)
-                            player = !player
+                if (stonePos(fromC-1,fromR+1)?.player != fromStone.player || stonePos(fromC+1,fromR+1)?.player != fromStone.player ){
+                    chainBlue(fromC,fromR,toC,toR,fromStone)
+                    if (!cap && ((stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone?.player ) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone?.player))) {
+                        if (toR-2 >= 0 && ((toC-2 >= 0 && stonePos(toC-2,toR-2)== null) || (toC+2 < 8 && stonePos(toC+2,toR-2)== null))){
+                            cap = true
+                            c_col = toC
+                            c_row = toR
+                            if(fromStone.player != DraughtPlayer.RED)
+                                player = !player
+                        }
                     }
+
+                    else if(fromStone.player == DraughtPlayer.RED)
+                        player = true
+                }
+                else{
+                    cap = false
+                    player = !player
                 }
 
-                else if(fromStone.player == DraughtPlayer.RED)
-                    player = true
+
 
             }
             else if(toR < fromR) {
-                chainRed(fromC,fromR,toC,toR,fromStone)
-                if (!cap && ((stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone?.player ) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone?.player))){
-                    if ((toC+2 < 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-2,toR+2)== null ||  stonePos(toC+2,toR+2)== null)){
-                        cap = true
-                        c_col = toC
-                        c_row = toR
-                        if(fromStone.player != DraughtPlayer.BLUE)
-                            player = !player
+                if (stonePos(fromC-1,fromR-1)?.player != fromStone.player || stonePos(fromC+1,fromR-1)?.player != fromStone.player ){
+                    chainRed(fromC,fromR,toC,toR,fromStone)
+                    if (!cap && ((stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone?.player ) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone?.player))){
+                        if (toR+2< 8 && ((toC-2 >= 0 && stonePos(toC-2,toR+2)== null) ||  (toC+2 < 8 && stonePos(toC+2,toR+2)== null))){
+                            cap = true
+                            c_col = toC
+                            c_row = toR
+                            if(fromStone.player != DraughtPlayer.BLUE)
+                                player = !player
+                        }
                     }
+
+                    else if(fromStone.player == DraughtPlayer.BLUE)
+                        player = false
+                }
+                else{
+                    cap = false
+                    player = !player
                 }
 
-                else if(fromStone.player == DraughtPlayer.BLUE)
-                    player = false
             }
         }
     }
@@ -203,7 +221,8 @@ class DraughtModel {
                                 stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
-                            if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
+                            if (toR-2 >= 0 && ((toC-2 >= 0 && stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone.player && stonePos(toC-2,toR-2)== null)
+                                        || (toC+2 < 8 && stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone.player && stonePos(toC+2,toR-2)== null))){
                                 cap = true
                                 c_col = toC
                                 c_row = toR
@@ -226,7 +245,8 @@ class DraughtModel {
                                 stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                             stones.remove(fromStone)
                             stones.remove(it)
-                            if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
+                            if (toR-2 >= 0 && ((toC-2 >= 0 && stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone.player && stonePos(toC-2,toR-2)== null)
+                                        || (toC+2 < 8 && stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone.player && stonePos(toC+2,toR-2)== null))){
                                 cap = true
                                 c_col = toC
                                 c_row = toR
@@ -254,10 +274,12 @@ class DraughtModel {
                             stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
-                        if ((toC+2 < 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
+                        if (toR+2 < 8 && ((toC-2 >= 0 && stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone.player && stonePos(toC-2,toR+2)== null)
+                                    || (toC+2 < 8 && stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone.player && stonePos(toC+2,toR+2)== null))){
                             cap = true
                             c_col = toC
                             c_row = toR
+                            Log.i("CHAINN","("+ it.col+","+it.row+")")
                         }
                         else{
                             player = false
@@ -280,7 +302,8 @@ class DraughtModel {
                             stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
-                        if ((toC+2< 8 && toC-2 > 0 && toR < 8) && (stonePos(toC-1,toR+1)!= null && stonePos(toC-2,toR+2)== null) || (stonePos(toC+1,toR+1)!= null && stonePos(toC+2,toR+2)== null)){
+                        if (toR+2 < 8 && ((toC-2 >= 0 && stonePos(toC-1,toR+1)!= null && stonePos(toC-1,toR+1)?.player != fromStone.player && stonePos(toC-2,toR+2)== null)
+                                    || (toC+2< 8 && stonePos(toC+1,toR+1)!= null && stonePos(toC+1,toR+1)?.player != fromStone.player && stonePos(toC+2,toR+2)== null))){
                             cap = true
                             c_col = toC
                             c_row = toR
@@ -310,13 +333,14 @@ class DraughtModel {
                             stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
-                        if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
+                        if (toR-2 >= 0 && ((toC-2 >= 0 && stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone.player && stonePos(toC-2,toR-2)== null)
+                                    || (toC+2 < 8 && stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone.player && stonePos(toC+2,toR-2)== null))){
                             cap = true
                             c_col = toC
                             c_row = toR
                         }
                         else{
-                            player = false
+                            player = true
                             cap = false}
                         Log.i("CHECKK2","("+ it.col+","+it.row+")")}
 
@@ -337,13 +361,14 @@ class DraughtModel {
                             stones.add(DraughtPieces(toC,toR,fromStone.player, PlayerRank.KING))
                         stones.remove(fromStone)
                         stones.remove(it)
-                        if ((toC+2 < 8 && toC-2 > 0 && toR > 0) && (stonePos(toC-1,toR-1)!= null && stonePos(toC-2,toR-2)== null) || (stonePos(toC+1,toR-1)!= null && stonePos(toC+2,toR-2)== null)){
+                        if (toR-2 >= 0 && ((toC-2 >= 0 && stonePos(toC-1,toR-1)!= null && stonePos(toC-1,toR-1)?.player != fromStone.player && stonePos(toC-2,toR-2)== null)
+                                    || (toC+2 < 8 && stonePos(toC+1,toR-1)!= null && stonePos(toC+1,toR-1)?.player != fromStone.player && stonePos(toC+2,toR-2)== null))){
                             cap = true
                             c_col = toC
                             c_row = toR
                         }
                         else{
-                            player = false
+                            player = true
                             cap = false}}
                 }
                 else{

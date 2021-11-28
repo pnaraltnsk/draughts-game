@@ -2,6 +2,7 @@ package com.example.secondassignment
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 
 class MainActivity : AppCompatActivity(), DraughtsInterface {
 
@@ -12,6 +13,11 @@ class MainActivity : AppCompatActivity(), DraughtsInterface {
 
         val draughtsV = findViewById<CustomView>(R.id.customview)
         draughtsV.draughtsInterface = this
+
+        findViewById<Button>(R.id.resetbtn).setOnClickListener{
+            draughts.default()
+            draughtsV.invalidate()
+        }
     }
 
     override fun stonePos(col: Int, row: Int): DraughtPieces? {

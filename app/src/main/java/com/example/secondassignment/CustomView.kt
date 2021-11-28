@@ -36,6 +36,12 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
         _blue.setColor(Color.argb(255, 0, 0, 255))
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val size = min(widthMeasureSpec,heightMeasureSpec)
+        setMeasuredDimension(size,size)
+    }
+
     override fun onDraw(canvas: Canvas?) {
         canvas ?: return
 
@@ -47,6 +53,7 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
         drawBoard(canvas)
         drawPieces(canvas)
     }
+
 
     private fun drawBoard(canvas: Canvas) {
         for (row in 0 until 8)
@@ -119,9 +126,7 @@ class CustomView(context: Context?, attrs: AttributeSet?) : View(context, attrs)
                 //Log.i("TAGG","from"+f_col+","+f_row+"to"+col+","+row)
 
             }
-            MotionEvent.ACTION_MOVE -> {
 
-            }
         }
         return true
     }
